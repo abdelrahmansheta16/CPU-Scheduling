@@ -1,3 +1,6 @@
+#ifndef fcfs_h
+#define fcfs_h
+
 #include<iostream>
 #include<string.h>
 #include <queue>
@@ -46,8 +49,4 @@ void fcfs(process p[], int maxtime, int nump)
     
 }
 
-int main()
-{
-
-    return 0;
-}
+#endif
