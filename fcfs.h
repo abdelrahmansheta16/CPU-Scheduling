@@ -29,17 +29,18 @@ void fcfs(process p[], int maxtime, int nump)
                 q.front().start = i;
             }
             
+            if (q.front().remainingtime != 0)
+            {
+                timeline[i] = q.front().name;
+                q.front().remainingtime--;
+            }
+
             if (q.front().remainingtime == 0)
             {
                 q.front().finish = i;
                 q.front().turnaround = q.front().finish - q.front().arrival;
                 q.front().normturn = q.front().turnaround/q.front().service;
                 q.pop();
-            }
-            else
-            {
-                timeline[i] = q.front().name;
-                q.front().remainingtime--;
             }
             
         }
