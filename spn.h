@@ -1,5 +1,5 @@
-#ifndef fcfs_h
-#define fcfs_h
+#ifndef spn_h
+#define spn_h
 
 #include<iostream>
 #include<string>
@@ -7,26 +7,44 @@
 #include "process.h"
 using namespace std;
 
-string fcfs(process p[], int maxtime, int nump)
+string spn(process p[], int maxtime, int nump)
 {
     string timeline = "";
-    queue<process> q;
+    vector<process> q;
+    int running = 0;
     for (int i = 0; i < maxtime; i++)
     {
         for (int j = 0; j < nump; j++)
         {
             if (p[j].arrival == i)
             {
-                q.push(p[j]);
+                q.push_back(p[j]);
             }
             
         }
 
         if (!q.empty())
         {
+            if ((q.size() > 1) && (running = 0))
+            {
+                int mini = 999;
+                for (int z = 0; z < q.size(); z++)
+                {
+                    if (q[z].service < mini)
+                    {
+                        mini = z;
+                    }
+                    
+                }
+
+                swap(q[0], q[mini]);
+                
+            }
+            
             if (q.front().remainingtime == q.front().service)
             {
                 q.front().start = i;
+                running = 1;
             }
             
             if (q.front().remainingtime != 0)
@@ -40,12 +58,15 @@ string fcfs(process p[], int maxtime, int nump)
                 q.front().finish = i;
                 q.front().turnaround = q.front().finish - q.front().arrival;
                 q.front().normturn = q.front().turnaround/q.front().service;
-                q.pop();
+                q.erase(q.begin());
+                running = 0;
             }
             
         }
-        
-        
+        else
+        {
+             timeline.append(" ",1);
+        }
     }
     
     return timeline;
