@@ -2,14 +2,14 @@
 #define fcfs_h
 
 #include<iostream>
-#include<string.h>
+#include<string>
 #include <queue>
 #include "process.h"
 using namespace std;
 
 void fcfs(process p[], int maxtime, int nump)
 {
-    char timeline[maxtime];
+    string timeline = "";
     queue<process> q;
     for (int i = 0; i < sizeof(maxtime); i++)
     {
@@ -31,7 +31,7 @@ void fcfs(process p[], int maxtime, int nump)
             
             if (q.front().remainingtime != 0)
             {
-                timeline[i] = q.front().name;
+                timeline.append(q.front().name,1);
                 q.front().remainingtime--;
             }
 
