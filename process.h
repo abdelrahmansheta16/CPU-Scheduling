@@ -11,6 +11,7 @@ struct process
     int start;
     int turnaround;
     float normturn;
+    int priority;
 };
 
 

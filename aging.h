@@ -1,0 +1,88 @@
+#ifndef aging_h
+#define aging_h
+
+#include<iostream>
+#include<string>
+#include <queue>
+#include "process.h"
+using namespace std;
+
+string aging(process * p[], int maxtime, int nump)
+{
+    string timeline = "";
+    vector<process> q;
+    int running = 0;
+    for (int i = 0; i < maxtime; i++)
+    {
+        for (int j = 0; j < nump; j++)
+        {
+            if (p[j]->arrival == i)
+            {
+                q.push_back(*p[j]);
+            }
+            
+        }
+
+        if (!q.empty())
+        {
+            if ((q.size() > 1) && (running = 0))
+            {
+                float maxp = -1;
+                int maxi;
+                for (int z = 0; z < q.size(); z++)
+                {
+                    if (q[z].priority > maxp)
+                    {
+                        maxp = q[z].priority;
+                        maxi = z;
+                    }
+                    
+                }
+
+                swap(q[0], q[maxi]);
+                
+            }
+            
+            if (q.front().remainingtime == q.front().service)
+            {
+                q.front().start = i;
+                running = 1;
+            }
+            
+            if (q.front().remainingtime != 0)
+            {
+                timeline.append(q.front().name,1);
+                q.front().remainingtime--;
+            }
+
+            if (q.front().remainingtime == 0)
+            {
+                q.front().finish = i;
+                q.front().turnaround = q.front().finish - q.front().arrival;
+                q.front().normturn = q.front().turnaround/q.front().service;
+                q.erase(q.begin());
+                running = 0;
+            }
+
+            if (q.size() > 1)
+            {
+                for (int ip = 1; ip < q.size(); ip++)
+                {
+                    q[ip].priority++;
+                }
+                
+            }
+            
+            
+        }
+        else
+        {
+             timeline.append(" ",1);
+        }
+    }
+    
+    return timeline;
+
+}
+
+#endif
