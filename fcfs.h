@@ -44,6 +44,10 @@ string fcfs(process p[], int maxtime, int nump)
             }
             
         }
+        else
+        {
+             timeline.append(" ",1);
+        }
         
         
     }
