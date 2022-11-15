@@ -7,7 +7,7 @@
 #include "process.h"
 using namespace std;
 
-void fcfs(process p[], int maxtime, int nump)
+string fcfs(process p[], int maxtime, int nump)
 {
     string timeline = "";
     queue<process> q;
@@ -48,6 +48,8 @@ void fcfs(process p[], int maxtime, int nump)
         
     }
     
+    return timeline;
+
 }
 
 #endif
