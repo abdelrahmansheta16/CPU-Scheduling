@@ -7,7 +7,7 @@
 #include "process.h"
 using namespace std;
 
-string spn(process p[], int maxtime, int nump)
+string spn(process * p[], int maxtime, int nump)
 {
     string timeline = "";
     vector<process> q;
@@ -16,9 +16,9 @@ string spn(process p[], int maxtime, int nump)
     {
         for (int j = 0; j < nump; j++)
         {
-            if (p[j].arrival == i)
+            if (p[j]->arrival == i)
             {
-                q.push_back(p[j]);
+                q.push_back(*p[j]);
             }
             
         }
