@@ -7,33 +7,33 @@
 #include "process.h"
 using namespace std;
 
-string aging(process * p[], int maxtime, int nump)
+string aging(process * p[], int maxtime, int nump, int quant)
 {
     string timeline = "";
-    vector<process> q;
-    int running = 0;
+    vector<process *> q;
+    int rq = quant;
     for (int i = 0; i < maxtime; i++)
     {
         for (int j = 0; j < nump; j++)
         {
             if (p[j]->arrival == i)
             {
-                q.push_back(*p[j]);
+                q.push_back(p[j]);
             }
             
         }
 
         if (!q.empty())
         {
-            if ((q.size() > 1) && (running = 0))
+            if ((q.size() > 1) && (rq == quant))
             {
                 float maxp = -1;
                 int maxi;
                 for (int z = 0; z < q.size(); z++)
                 {
-                    if (q[z].priority > maxp)
+                    if (q[z]->priority > maxp)
                     {
-                        maxp = q[z].priority;
+                        maxp = q[z]->priority;
                         maxi = z;
                     }
                     
@@ -43,32 +43,32 @@ string aging(process * p[], int maxtime, int nump)
                 
             }
             
-            if (q.front().remainingtime == q.front().service)
+            if (q.front()->remainingtime == q.front()->service)
             {
-                q.front().start = i;
-                running = 1;
+                q.front()->start = i;
             }
             
-            if (q.front().remainingtime != 0)
+            if (q.front()->remainingtime != 0)
             {
-                timeline.append(q.front().name,1);
-                q.front().remainingtime--;
+                timeline.append(q.front()->name,1);
+                q.front()->remainingtime--;
+                rq--;
             }
 
-            if (q.front().remainingtime == 0)
+            if (q.front()->remainingtime == 0)
             {
-                q.front().finish = i;
-                q.front().turnaround = q.front().finish - q.front().arrival;
-                q.front().normturn = q.front().turnaround/q.front().service;
+                q.front()->finish = i;
+                q.front()->turnaround = q.front()->finish - q.front()->arrival;
+                q.front()->normturn = q.front()->turnaround/q.front()->service;
                 q.erase(q.begin());
-                running = 0;
+                rq = quant;
             }
 
             if (q.size() > 1)
             {
                 for (int ip = 1; ip < q.size(); ip++)
                 {
-                    q[ip].priority++;
+                    q[ip]->priority++;
                 }
                 
             }

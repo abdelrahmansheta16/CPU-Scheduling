@@ -10,7 +10,7 @@ using namespace std;
 string spn(process * p[], int maxtime, int nump)
 {
     string timeline = "";
-    vector<process> q;
+    vector<process *> q;
     int running = 0;
     for (int i = 0; i < maxtime; i++)
     {
@@ -18,46 +18,47 @@ string spn(process * p[], int maxtime, int nump)
         {
             if (p[j]->arrival == i)
             {
-                q.push_back(*p[j]);
+                q.push_back(p[j]);
             }
             
         }
 
         if (!q.empty())
         {
-            if ((q.size() > 1) && (running = 0))
+            if ((q.size() > 1) && (running == 0))
             {
-                int mini = 999;
+                int mini = maxtime + 1;
+                int minindex = 0;
                 for (int z = 0; z < q.size(); z++)
                 {
-                    if (q[z].service < mini)
+                    if (q[z]->service < mini)
                     {
-                        mini = z;
+                        mini = q[z]->service;
+                        minindex = z;
                     }
                     
                 }
-
-                swap(q[0], q[mini]);
+                swap(q[0], q[minindex]);
                 
             }
             
-            if (q.front().remainingtime == q.front().service)
+            if (q.front()->remainingtime == q.front()->service)
             {
-                q.front().start = i;
+                q.front()->start = i;
                 running = 1;
             }
             
-            if (q.front().remainingtime != 0)
+            if (q.front()->remainingtime != 0)
             {
-                timeline.append(q.front().name,1);
-                q.front().remainingtime--;
+                timeline.append(q.front()->name,1);
+                q.front()->remainingtime--;
             }
 
-            if (q.front().remainingtime == 0)
+            if (q.front()->remainingtime == 0)
             {
-                q.front().finish = i;
-                q.front().turnaround = q.front().finish - q.front().arrival;
-                q.front().normturn = q.front().turnaround/q.front().service;
+                q.front()->finish = i;
+                q.front()->turnaround = q.front()->finish - q.front()->arrival;
+                q.front()->normturn = q.front()->turnaround/q.front()->service;
                 q.erase(q.begin());
                 running = 0;
             }
