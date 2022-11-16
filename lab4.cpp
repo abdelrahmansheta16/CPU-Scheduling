@@ -18,9 +18,17 @@ int main()
     {
         p[i] = new process;
     }
-    
+
     int maxtime = 20;
     int np = 5;
+    char * timeline[maxtime];
+
+    for (int i = 0; i < maxtime; i++)
+    {
+        timeline[i] = new char;
+    }
+    
+
     p[0]->name = 'A';
     p[1]->name = 'B';
     p[2]->name = 'C';
@@ -45,7 +53,7 @@ int main()
     p[3]->remainingtime = 5;
     p[4]->remainingtime = 2;
 
-    string str = hrrn(p, maxtime, np);
+    hrrn(p, maxtime, np, timeline);
 
     for (int i = 0; i < 5; i++)
     {
@@ -53,9 +61,13 @@ int main()
         cout << "\n";
     }
     
+    for (int i = 0; i < maxtime; i++)
+    {
+        cout << *timeline[i];
+    }
+    
 
-    cout << str << "\n";
-    cout << "BYE! \n";
+    cout << "\nBYE! \n";
 
     return 0;
 }

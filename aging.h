@@ -7,9 +7,8 @@
 #include "process.h"
 using namespace std;
 
-string aging(process * p[], int maxtime, int nump, int quant)
+void aging(process * p[], int maxtime, int nump, int quant, char * timeline[])
 {
-    string timeline = "";
     vector<process *> q;
     int rq = quant;
     for (int i = 0; i < maxtime; i++)
@@ -50,7 +49,7 @@ string aging(process * p[], int maxtime, int nump, int quant)
             
             if (q.front()->remainingtime != 0)
             {
-                timeline.append(q.front()->name,1);
+                *timeline[i] = q.front()->name;
                 q.front()->remainingtime--;
                 rq--;
             }
@@ -77,11 +76,10 @@ string aging(process * p[], int maxtime, int nump, int quant)
         }
         else
         {
-             timeline.append(" ",1);
+            *timeline[i] = ' ';
         }
     }
     
-    return timeline;
 
 }
 

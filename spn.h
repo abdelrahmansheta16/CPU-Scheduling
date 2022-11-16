@@ -7,9 +7,8 @@
 #include "process.h"
 using namespace std;
 
-string spn(process * p[], int maxtime, int nump)
+void spn(process * p[], int maxtime, int nump, char * timeline[])
 {
-    string timeline = "";
     vector<process *> q;
     int running = 0;
     for (int i = 0; i < maxtime; i++)
@@ -50,7 +49,7 @@ string spn(process * p[], int maxtime, int nump)
             
             if (q.front()->remainingtime != 0)
             {
-                timeline.append(q.front()->name,1);
+                *timeline[i] = q.front()->name;
                 q.front()->remainingtime--;
             }
 
@@ -66,11 +65,9 @@ string spn(process * p[], int maxtime, int nump)
         }
         else
         {
-             timeline.append(" ",1);
+            *timeline[i] = ' ';
         }
     }
-    
-    return timeline;
 
 }
 
