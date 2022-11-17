@@ -10,25 +10,23 @@ using namespace std;
 
 #include "process.h"
 
-void printTrace(int n, int total_waiting_time[100][100], int lastInstance)
+void printTrace(int n, int total_waiting_time[100][100], int lastInstance, int tq, process * p[])
 {
-    cout << endl;
-    cout << "FB-1"
-         << "\t"
-         << " ";
-    for (int i = 0; i < lastInstance; i++)
+    cout << "RR-" << tq
+         << "  ";
+    for (int i = 0; i < lastInstance+1; i++)
     {
         cout << i % 10 << " ";
     }
     cout << endl;
-    for (int i = 0; i < 50; i++)
+    for (int i = 0; i < 48; i++)
     {
         cout << "-";
     }
     cout << endl;
     for (int i = 0; i < n; i++)
     {
-        cout << static_cast<char>('A' + i) << "\t";
+        cout << p[i]->name << "     ";
         for (int x = 0; x < lastInstance; x++)
         {
             cout << "|";
@@ -47,16 +45,17 @@ void printTrace(int n, int total_waiting_time[100][100], int lastInstance)
         }
         cout << "|\n";
     }
-    for (int i = 0; i < 50; i++)
+    for (int i = 0; i < 48; i++)
     {
         cout << "-";
     }
+    cout << "\n";
 }
-void printStats(int n, int total_turnaround, process * p[])
+void printStats(int n, int total_turnaround, process * p[], int tq)
 {
     float totalTurnAround = 0;
     cout << endl;
-    cout << "FB-1"
+    cout << "RR-" << tq
          << "\n";
     cout << "Process    ";
     for (int i = 0; i < n; i++)
@@ -265,12 +264,12 @@ void rr(int n, int tq, int lastInstance, process * p[], string printmode)
 
     if (!printmode.compare("stats") )
     {
-        printStats(n, total_turnaround, p);
+        printStats(n, total_turnaround, p, tq);
 
     }
     else
     {
-        printTrace(n, total_waiting_time, lastInstance);
+        printTrace(n, total_waiting_time, lastInstance, tq, p);
     }
     
     
