@@ -36,9 +36,9 @@ void fcfs(process * p[], int maxtime, int nump, char * timeline[])
 
             if (q.front()->remainingtime == 0)
             {
-                q.front()->finish = i;
+                q.front()->finish = i+1;
                 q.front()->turnaround = q.front()->finish - q.front()->arrival;
-                q.front()->normturn = q.front()->turnaround/q.front()->service;
+                q.front()->normturn = (float)q.front()->turnaround/(float)q.front()->service;
                 q.pop();
             }
             

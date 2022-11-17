@@ -129,7 +129,7 @@ void parse()
         cout << sched.front().stype << "\n";
         for (int k = 0; k < nump; k++)
         {
-            cout << ptemp[k]->name << " " << ptemp[k]->finish;
+            cout << ptemp[k]->name << " " << ptemp[k]->finish << " " << ptemp[k]->turnaround << " " << ptemp[k]->normturn;
             cout << "\n";
         }
         
