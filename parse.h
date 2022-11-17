@@ -13,6 +13,7 @@ using namespace std;
 #include "hrrn.h"
 #include "aging.h"
 #include "scheduler.h"
+#include "rr.h"
 
 void parse()
 {
@@ -102,7 +103,7 @@ void parse()
             fcfs(ptemp, maxtime, nump, timeline);
             break;
         case 2:
-            /* code */
+            rr(nump, sched.front().addpar, maxtime, ptemp, outmode);
             break;
         case 3:
             spn(ptemp, maxtime, nump, timeline);
@@ -126,7 +127,7 @@ void parse()
             break;
         }
 
-        cout << sched.front().stype << "\n";
+        /*cout << sched.front().stype << "\n";
         for (int k = 0; k < nump; k++)
         {
             cout << ptemp[k]->name << " " << ptemp[k]->finish << " " << ptemp[k]->turnaround << " " << ptemp[k]->normturn;
@@ -136,7 +137,7 @@ void parse()
         for (int k = 0; k < maxtime; k++)
         {
             cout << *timeline[k];
-        }
+        }*/
 
         cout << "\n";
 

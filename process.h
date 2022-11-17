@@ -12,6 +12,10 @@ struct process
     int turnaround;
     float normturn;
     int priority;
+    int pid;
+    int waiting_time = 0;
+    int isWaiting = 0;
+    int response_time;
 };
 
 
