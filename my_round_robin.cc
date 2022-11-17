@@ -17,7 +17,109 @@ struct process
     int isWaiting = 0;
     int response_time;
 };
-
+void printTrace(int n, int total_waiting_time[100][100], process p[], int lastInstance)
+{
+    cout << endl;
+    cout << "FB-1"
+         << "\t"
+         << " ";
+    for (int i = 0; i < lastInstance; i++)
+    {
+        cout << i % 10 << " ";
+    }
+    cout << endl;
+    for (int i = 0; i < 50; i++)
+    {
+        cout << "-";
+    }
+    cout << endl;
+    for (int i = 0; i < n; i++)
+    {
+        cout << static_cast<char>('A' + i) << "\t";
+        for (int x = 0; x < lastInstance; x++)
+        {
+            cout << "|";
+            if (total_waiting_time[i][x] == 0)
+            {
+                cout << " ";
+            }
+            else if (total_waiting_time[i][x] == 1)
+            {
+                cout << ".";
+            }
+            else if (total_waiting_time[i][x] == 2)
+            {
+                cout << "*";
+            }
+        }
+        cout << "|\n";
+    }
+    for (int i = 0; i < 50; i++)
+    {
+        cout << "-";
+    }
+}
+void printStats(int n, int total_turnaround_time, process p[])
+{
+    float totalTurnAround = 0;
+    cout << endl;
+    cout << "FB-1"
+         << "\n";
+    cout << "Process    ";
+    for (int i = 0; i < n; i++)
+    {
+        cout << "|  " << static_cast<char>('A' + i) << "  ";
+    }
+    cout << "|";
+    cout << "\n";
+    cout << "Arrival    ";
+    for (int i = 0; i < n; i++)
+    {
+        cout << "|  " << p[i].arrival_time << "  ";
+    }
+    cout << "|";
+    cout << "\n";
+    cout << "Service    ";
+    for (int i = 0; i < n; i++)
+    {
+        cout << "|  " << p[i].burst_time << "  ";
+    }
+    cout << "| ";
+    cout << "Mean|";
+    cout << "\n";
+    cout << "Finish     ";
+    for (int i = 0; i < n; i++)
+    {
+        cout << "| ";
+        (float)p[i].completion_time / 10 >= 1 ? cout << "" : cout << " ";
+        cout << p[i].completion_time << "  ";
+    }
+    cout << "|";
+    cout << "-----|";
+    cout << "\n";
+    cout << "Turnaround ";
+    for (int i = 0; i < n; i++)
+    {
+        p[i].turnaround_time = p[i].completion_time - p[i].arrival_time;
+        cout << "| ";
+        (float)p[i].turnaround_time / 10 >= 1 ? cout << "" : cout << " ";
+        cout << p[i].turnaround_time << "  ";
+        total_turnaround_time += p[i].turnaround_time;
+    }
+    cout << "|";
+    cout << fixed << setprecision(2) << (float)total_turnaround_time / n;
+    cout << "|";
+    cout << "\n";
+    cout << "NormTurn   ";
+    for (int i = 0; i < n; i++)
+    {
+        cout << "| " << fixed << setprecision(2) << (float)p[i].turnaround_time / p[i].burst_time;
+        totalTurnAround += (float)p[i].turnaround_time / p[i].burst_time;
+    }
+    cout << "| ";
+    cout << fixed << setprecision(2) << (float)totalTurnAround / n;
+    cout << "|";
+}
 bool compare1(process p1, process p2)
 {
     return p1.arrival_time < p2.arrival_time;
@@ -89,7 +191,8 @@ int main()
                 q.push(x);
                 p[x].isWaiting = 1;
             }
-            if(p[x].isWaiting){
+            if (p[x].isWaiting)
+            {
                 total_waiting_time[x][currentTime] = 1;
             }
         }
@@ -122,10 +225,12 @@ int main()
                 q.pop();
                 burst_remaining[currentExecProcess]--;
                 remaining_qt[currentExecProcess]--;
-                if(burst_remaining[currentExecProcess] == 0){
+                if (burst_remaining[currentExecProcess] == 0)
+                {
                     p[currentExecProcess].isWaiting = 0;
                 }
-                if(remaining_qt[currentExecProcess] == 0 && burst_remaining[currentExecProcess] > 0){
+                if (remaining_qt[currentExecProcess] == 0 && burst_remaining[currentExecProcess] > 0)
+                {
                     p[currentExecProcess].isWaiting = 1;
                 }
                 cout << "Burst Remaining: " << burst_remaining[currentExecProcess] << "\n";
@@ -134,7 +239,6 @@ int main()
             }
             else if (remaining_qt[currentExecProcess] > 0 && burst_remaining[currentExecProcess] == 0)
             {
-                p[currentExecProcess].completion_time = currentTime - 1;
                 p[currentExecProcess].isWaiting = 0;
                 remaining_qt[currentExecProcess] = 0;
                 currentExecProcess = q.front();
@@ -145,7 +249,6 @@ int main()
             }
             else if (remaining_qt[currentExecProcess] == 0 && burst_remaining[currentExecProcess] == 0)
             {
-                p[currentExecProcess].completion_time = currentTime - 1;
                 p[currentExecProcess].isWaiting = 0;
                 remaining_qt[currentExecProcess] = 0;
                 currentExecProcess = q.front();
@@ -153,7 +256,8 @@ int main()
                 q.pop();
                 burst_remaining[currentExecProcess]--;
                 remaining_qt[currentExecProcess]--;
-                if(burst_remaining[currentExecProcess] == 0){
+                if (burst_remaining[currentExecProcess] == 0)
+                {
                     p[currentExecProcess].isWaiting = 0;
                 }
                 cout << "Burst Remaining: " << burst_remaining[currentExecProcess] << "\n";
@@ -176,7 +280,7 @@ int main()
             {
                 if (z > p[y].arrival_time && total_waiting_time[y][z - 1] > 0)
                 {
-                    total_waiting_time[y][z] == 0?p[y].completion_time = z - 1:p[y].completion_time = z;
+                    total_waiting_time[y][z] == 0 ? p[y].completion_time = z-1 : p[y].completion_time = z+1;
                 }
             }
         }
@@ -189,25 +293,8 @@ int main()
 
     sort(p, p + n, compare2);
 
-    cout << endl;
-    cout << "#P\t"
-         << "AT\t"
-         << "BT\t"
-         << "ST\t"
-         << "CT\t"
-         << "TAT\t"
-         << "WT\t"
-         << "RT\t"
-         << "\n"
-         << endl;
-
-    for (int i = 0; i < n; i++)
-    {
-        p[i].turnaround_time = p[i].completion_time - p[i].arrival_time + 1;
-        cout << p[i].pid << "\t" << p[i].arrival_time << "\t" << p[i].burst_time << "\t" << 0 << "\t" << p[i].completion_time << "\t" << p[i].turnaround_time << "\t" << p[i].waiting_time << "\t" << 0 << "\t"
-             << "\n"
-             << endl;
-    }
+    printStats(n, total_turnaround_time, p);
+    printTrace(n, total_waiting_time, p, lastInstance);
     // cout << "Average Turnaround Time = " << avg_turnaround_time << endl;
     // cout << "Average Waiting Time = " << avg_waiting_time << endl;
     // cout << "Average Response Time = " << avg_response_time << endl;
