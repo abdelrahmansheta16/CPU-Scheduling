@@ -1,19 +1,25 @@
-#ifndef rr_h
-#define rr_h
+#ifndef fb_h
+#define fb_h
+
 
 #include <iostream>
 #include <algorithm>
 #include <iomanip>
 #include <queue>
 #include <cstring>
-using namespace std;
-
+#include <math.h>
 #include "process.h"
 
-void printTrace(int n, int total_waiting_time[100][100], int lastInstance, int tq, process * p[])
+
+#define ARRAYSIZE(array) (sizeof(array) / sizeof(array[0]))
+using namespace std;
+
+
+void printTrace(int n, int total_waiting_time[100][100], process * p[], int lastInstance, int addpar)
 {
-    cout << "RR-" << tq
-         << "  ";
+    cout << "FB-" << addpar
+         << "\t"
+         << " ";
     for (int i = 0; i < lastInstance+1; i++)
     {
         cout << i % 10 << " ";
@@ -26,7 +32,7 @@ void printTrace(int n, int total_waiting_time[100][100], int lastInstance, int t
     cout << endl;
     for (int i = 0; i < n; i++)
     {
-        cout << p[i]->name << "     ";
+        cout << p[i]->name << "\t";
         for (int x = 0; x < lastInstance; x++)
         {
             cout << "|";
@@ -43,7 +49,7 @@ void printTrace(int n, int total_waiting_time[100][100], int lastInstance, int t
                 cout << "*";
             }
         }
-        cout << "| \n";
+        cout << "|\n";
     }
     for (int i = 0; i < 48; i++)
     {
@@ -51,10 +57,12 @@ void printTrace(int n, int total_waiting_time[100][100], int lastInstance, int t
     }
     cout << "\n";
 }
-void printStats(int n, int total_turnaround, process * p[], int tq)
+
+
+void printStats(int n, int total_turnaround, process * p[], int addpar)
 {
     float totalTurnAround = 0;
-    cout << "RR-" << tq
+    cout << "FB-" << addpar
          << "\n";
     cout << "Process    ";
     for (int i = 0; i < n; i++)
@@ -111,20 +119,10 @@ void printStats(int n, int total_turnaround, process * p[], int tq)
     cout << fixed << setprecision(2) << (float)totalTurnAround / n;
     cout << "|\n";
 }
-bool compare1(process * p1, process * p2)
+
+int fb(int n, int lastInstance, process * p[], int addpar, string outmode)
 {
-    return p1->arrival < p2->arrival;
-}
-
-
-bool compare2(process * p1, process * p2)
-{
-    return p1->pid < p2->pid;
-}
-
-
-void rr(int n, int tq, int lastInstance, process * p[], string printmode)
-{
+    // int tq;
     float avg_turnaround;
     float avg_waiting_time;
     float avg_response_time;
@@ -134,28 +132,30 @@ void rr(int n, int tq, int lastInstance, process * p[], string printmode)
     int total_response_time = 0;
     int total_idle_time = 0;
     float throughput;
-    int remaining_qt[10];
+    double remaining_qt[10];
     int idx;
 
 
-    
+
     memset(total_waiting_time, 0, sizeof(total_waiting_time));
+
 
     for (int i = 0; i < n; i++)
     {
         p[i]->pid = i + 1;
     }
 
+
     for (int i = 0; i < 10; i++)
     {
-        remaining_qt[i] = tq;
+        remaining_qt[i] = 1;
     }
 
 
     sort(p, p + n, compare1);
 
 
-    queue<int> q;
+    queue<int> q[10];
     int currentTime;
     int currentExecProcess = -1;
     for (int i = 0; i < lastInstance; i++)
@@ -165,7 +165,7 @@ void rr(int n, int tq, int lastInstance, process * p[], string printmode)
         {
             if (p[x]->arrival == currentTime)
             {
-                q.push(x);
+                q[0].push(x);
                 p[x]->isWaiting = 1;
             }
             if (p[x]->isWaiting)
@@ -175,12 +175,21 @@ void rr(int n, int tq, int lastInstance, process * p[], string printmode)
         }
         if (currentExecProcess < 0)
         {
-            if (!q.empty())
+            if (!q[0].empty())
             {
-                currentExecProcess = q.front();
-                q.pop();
+                currentExecProcess = q[0].front();
+                q[0].pop();
+                p[currentExecProcess]->currentQueue = 0;
                 p[currentExecProcess]->remainingtime--;
                 remaining_qt[currentExecProcess]--;
+                if (p[currentExecProcess]->remainingtime == 0)
+                {
+                    p[currentExecProcess]->isWaiting = 0;
+                }
+                if (remaining_qt[currentExecProcess] == 0 && p[currentExecProcess]->remainingtime > 0)
+                {
+                    p[currentExecProcess]->isWaiting = 1;
+                }
                 total_waiting_time[currentExecProcess][currentTime] = 2;
             }
         }
@@ -203,47 +212,103 @@ void rr(int n, int tq, int lastInstance, process * p[], string printmode)
             else if (remaining_qt[currentExecProcess] == 0 && p[currentExecProcess]->remainingtime > 0)
             {
                 p[currentExecProcess]->isWaiting = 1;
-                remaining_qt[currentExecProcess] = tq;
-                q.push(currentExecProcess);
-                currentExecProcess = q.front();
-                q.pop();
-                p[currentExecProcess]->remainingtime--;
-                remaining_qt[currentExecProcess]--;
-                if (p[currentExecProcess]->remainingtime == 0)
+                p[currentExecProcess]->currentQueue++;
+                
+                if (addpar == 1)
                 {
-                    p[currentExecProcess]->isWaiting = 0;
+                    remaining_qt[currentExecProcess] = 1;
                 }
-                if (remaining_qt[currentExecProcess] == 0 && p[currentExecProcess]->remainingtime > 0)
+                else
                 {
-                    p[currentExecProcess]->isWaiting = 1;
+                    remaining_qt[currentExecProcess] = pow(2, p[currentExecProcess]->currentQueue);
                 }
-                total_waiting_time[currentExecProcess][currentTime] = 2;
+                q[p[currentExecProcess]->currentQueue].push(currentExecProcess);
+                for (int x = 0; x < ARRAYSIZE(q); x++)
+                {
+                    if (!q[x].empty())
+                    {
+
+
+                        currentExecProcess = q[x].front();
+                        q[x].pop();
+                        p[currentExecProcess]->currentQueue = x;
+                        p[currentExecProcess]->remainingtime--;
+                        remaining_qt[currentExecProcess]--;
+                        if (p[currentExecProcess]->remainingtime == 0)
+                        {
+                            p[currentExecProcess]->isWaiting = 0;
+                        }
+                        if (remaining_qt[currentExecProcess] == 0 && p[currentExecProcess]->remainingtime > 0)
+                        {
+                            p[currentExecProcess]->isWaiting = 1;
+                        }
+                        total_waiting_time[currentExecProcess][currentTime] = 2;
+                        break;
+                    }
+                }
             }
             else if (remaining_qt[currentExecProcess] > 0 && p[currentExecProcess]->remainingtime == 0)
             {
                 p[currentExecProcess]->isWaiting = 0;
                 remaining_qt[currentExecProcess] = 0;
-                currentExecProcess = q.front();
-                q.pop();
-                p[currentExecProcess]->remainingtime--;
-                remaining_qt[currentExecProcess]--;
-                total_waiting_time[currentExecProcess][currentTime] = 2;
+
+
+                for (int x = 0; x < ARRAYSIZE(q); x++)
+                {
+                    if (!q[x].empty())
+                    {
+
+
+                        currentExecProcess = q[x].front();
+                        q[x].pop();
+                        p[currentExecProcess]->currentQueue = x;
+                        p[currentExecProcess]->remainingtime--;
+                        remaining_qt[currentExecProcess]--;
+                        if (p[currentExecProcess]->remainingtime == 0)
+                        {
+                            p[currentExecProcess]->isWaiting = 0;
+                        }
+                        if (remaining_qt[currentExecProcess] == 0 && p[currentExecProcess]->remainingtime > 0)
+                        {
+                            p[currentExecProcess]->isWaiting = 1;
+                        }
+                        total_waiting_time[currentExecProcess][currentTime] = 2;
+                        break;
+                    }
+                }
             }
             else if (remaining_qt[currentExecProcess] == 0 && p[currentExecProcess]->remainingtime == 0)
             {
                 p[currentExecProcess]->isWaiting = 0;
                 remaining_qt[currentExecProcess] = 0;
-                currentExecProcess = q.front();
-                q.pop();
-                p[currentExecProcess]->remainingtime--;
-                remaining_qt[currentExecProcess]--;
-                if (p[currentExecProcess]->remainingtime == 0)
+                for (int x = 0; x < ARRAYSIZE(q); x++)
                 {
-                    p[currentExecProcess]->isWaiting = 0;
+                    if (!q[x].empty())
+                    {
+
+
+                        currentExecProcess = q[x].front();
+                        q[x].pop();
+                        p[currentExecProcess]->currentQueue = x;
+                        p[currentExecProcess]->remainingtime--;
+                        remaining_qt[currentExecProcess]--;
+                        if (p[currentExecProcess]->remainingtime == 0)
+                        {
+                            p[currentExecProcess]->isWaiting = 0;
+                        }
+                        if (remaining_qt[currentExecProcess] == 0 && p[currentExecProcess]->remainingtime > 0)
+                        {
+                            p[currentExecProcess]->isWaiting = 1;
+                        }
+                        total_waiting_time[currentExecProcess][currentTime] = 2;
+                        break;
+                    }
                 }
-                total_waiting_time[currentExecProcess][currentTime] = 2;
             }
         }
+
+
+        cout << currentExecProcess << "\n";
     }
 
 
@@ -251,7 +316,6 @@ void rr(int n, int tq, int lastInstance, process * p[], string printmode)
     {
         for (int z = 0; z < lastInstance; z++)
         {
-            // cout << total_waiting_time[y][z] << "\n";
             if (total_waiting_time[y][z] == 1)
             {
                 p[y]->waiting_time++;
@@ -260,7 +324,7 @@ void rr(int n, int tq, int lastInstance, process * p[], string printmode)
             {
                 if (z > p[y]->arrival && total_waiting_time[y][z - 1] > 0)
                 {
-                    total_waiting_time[y][z] == 0 ? p[y]->finish = z : p[y]->finish = z+1;
+                    total_waiting_time[y][z] == 0 ? p[y]->finish = z : p[y]->finish = z + 1;
                 }
             }
         }
@@ -274,22 +338,31 @@ void rr(int n, int tq, int lastInstance, process * p[], string printmode)
 
     sort(p, p + n, compare2);
 
-    if (!printmode.compare("stats") )
+    if (!outmode.compare("stats") )
     {
-        printStats(n, total_turnaround, p, tq);
-
+    printStats(n, total_turnaround, p, addpar);
     }
     else
     {
-        printTrace(n, total_waiting_time, lastInstance, tq, p);
+    printTrace(n, total_waiting_time, p, lastInstance, addpar);
     }
-    
-    
+    // for (int i = 0; i < n; i++)
+    // {
+    //     cout << "|  " << static_cast<char>('A' + i) << "  \n";
+    //     cout << "|  " << p[i]->arrival << "  \n";
+    //     cout << "|  " << p[i]->service << "  \n";
+    //     cout << "|  " << p[i]->finish << "  \n";
+    //     cout << "|  " << p[i]->finish - p[i]->arrival<< "  \n";
+    //     cout << "|  " << (p[i]->finish - p[i]->arrival)/p[i]->service << "  \n";
+
+
+    // }
+
+
     // cout << "Average Turnaround Time = " << avg_turnaround << endl;
     // cout << "Average Waiting Time = " << avg_waiting_time << endl;
     // cout << "Average Response Time = " << avg_response_time << endl;
     // cout << "CPU Utilization = " << cpu_utilisation << "%" << endl;
     // cout << "Throughput = " << throughput << " process/unit time" << endl;
 }
-
 #endif

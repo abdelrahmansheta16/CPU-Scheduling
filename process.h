@@ -16,6 +16,7 @@ struct process
     int waiting_time = 0;
     int isWaiting = 0;
     int response_time;
+    int currentQueue;
 };
 
 

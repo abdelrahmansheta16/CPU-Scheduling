@@ -5,9 +5,123 @@
 #include<string>
 #include <queue>
 #include "process.h"
+
+#include <cstring>
+#include <algorithm>
+#include <iomanip>
+
 using namespace std;
 
-void aging(process * p[], int maxtime, int nump, int quant, char * timeline[])
+void printTraceage(int n, char * timeline[], process * p[], int lastInstance)
+{
+    cout << "Aging"
+         << " ";
+    for (int i = 0; i < lastInstance+1; i++)
+    {
+        cout << i % 10 << " ";
+    }
+    cout << endl;
+    for (int i = 0; i < 48; i++)
+    {
+        cout << "-";
+    }
+    cout << endl;
+    for (int i = 0; i < n; i++)
+    {
+        cout << p[i]->name << "     ";
+        for (int x = 0; x < lastInstance; x++)
+        {
+            cout << "|";
+            if ((*timeline[x] != p[i]->name))
+            {
+                if ((x < p[i]->arrival))
+                {
+                    cout << " ";
+                }
+                else if ((x > p[i]->finish-1))
+                {
+                    cout << " ";
+                }
+                else
+                {
+                    cout << ".";
+                }   
+            }
+            else
+            {
+                cout << "*";
+            }
+        }
+        cout << "| \n";
+    }
+    for (int i = 0; i < 48; i++)
+    {
+        cout << "-";
+    }
+    cout << "\n";
+}
+void printStatsage(int n, int total_turnaround, process * p[])
+{
+    float totalTurnAround = 0;
+    cout << "Aging"
+         << "\n";
+    cout << "Process    ";
+    for (int i = 0; i < n; i++)
+    {
+        cout << "|  " << p[i]->name << "  ";
+    }
+    cout << "|";
+    cout << "\n";
+    cout << "Arrival    ";
+    for (int i = 0; i < n; i++)
+    {
+        cout << "|  " << p[i]->arrival << "  ";
+    }
+    cout << "|";
+    cout << "\n";
+    cout << "Service    ";
+    for (int i = 0; i < n; i++)
+    {
+        cout << "|  " << p[i]->service << "  ";
+    }
+    cout << "| ";
+    cout << "Mean|";
+    cout << "\n";
+    cout << "Finish     ";
+    for (int i = 0; i < n; i++)
+    {
+        cout << "| ";
+        (float)p[i]->finish / 10 >= 1 ? cout << "" : cout << " ";
+        cout << p[i]->finish << "  ";
+    }
+    cout << "|";
+    cout << "-----|";
+    cout << "\n";
+    cout << "Turnaround ";
+    for (int i = 0; i < n; i++)
+    {
+        p[i]->turnaround = p[i]->finish - p[i]->arrival;
+        cout << "| ";
+        (float)p[i]->turnaround / 10 >= 1 ? cout << "" : cout << " ";
+        cout << p[i]->turnaround << "  ";
+        total_turnaround += p[i]->turnaround;
+    }
+    cout << "| ";
+    cout << fixed << setprecision(2) << (float)total_turnaround / n;
+    cout << "|";
+    cout << "\n";
+    cout << "NormTurn   ";
+    for (int i = 0; i < n; i++)
+    {
+        cout << "| " << fixed << setprecision(2) << (float)p[i]->turnaround / p[i]->service;
+        totalTurnAround += (float)p[i]->turnaround / p[i]->service;
+    }
+    cout << "| ";
+    cout << fixed << setprecision(2) << (float)totalTurnAround / n;
+    cout << "|\n";
+}
+
+void aging(process * p[], int maxtime, int nump, int quant, char * timeline[], string printmode)
 {
     vector<process *> q;
     int rq = quant;
@@ -80,6 +194,14 @@ void aging(process * p[], int maxtime, int nump, int quant, char * timeline[])
         }
     }
     
+    if (!printmode.compare("stats") )
+    {
+    printStatsage(nump, 0, p);
+    }
+    else
+    {
+    printTraceage(nump, timeline, p, maxtime);
+    }
 
 }
 

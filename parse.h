@@ -58,7 +58,8 @@ void parse()
         p[i]->priority = 0;
     }
     
-    vector<scheduler> sched;
+    queue<scheduler> sched;
+    
     while (!smode.empty())
     {
         scheduler stemp;
@@ -74,10 +75,12 @@ void parse()
             }
             smode.erase(0,1);
         }
-        sched.push_back(stemp);
+        sched.push(stemp);
     }
 
-    for (int i = 0; i <= sched.size(); i++)
+    int sizeofs = sched.size();
+
+    for (int i = 0; i < sizeofs; i++)
     {
         process * ptemp[nump];
         for (int j = 0; j < nump; j++)
@@ -101,19 +104,19 @@ void parse()
         switch (sched.front().stype)
         {
         case 1:
-            fcfs(ptemp, maxtime, nump, timeline);
+            fcfs(ptemp, maxtime, nump, timeline, outmode);
             break;
         case 2:
             rr(nump, sched.front().addpar, maxtime, ptemp, outmode);
             break;
         case 3:
-            spn(ptemp, maxtime, nump, timeline);
+            spn(ptemp, maxtime, nump, timeline, outmode);
             break;
         case 4:
             srt(nump, maxtime, ptemp, outmode);
             break;
         case 5:
-            hrrn(ptemp, maxtime, nump, timeline);
+            hrrn(ptemp, maxtime, nump, timeline, outmode);
             break;
         case 6:
             /* code */
@@ -122,7 +125,7 @@ void parse()
             /* code */
             break;
         case 8:
-            aging(ptemp, maxtime, nump, sched.front().addpar, timeline);
+            aging(ptemp, maxtime, nump, sched.front().addpar, timeline, outmode);
             break;
         default:
             break;
@@ -142,7 +145,7 @@ void parse()
 
         cout << "\n";
 
-        sched.erase(sched.begin());
+        sched.pop();
     }
 }
 

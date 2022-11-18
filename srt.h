@@ -44,7 +44,7 @@ void printTrace(int n, int total_waiting_time[100][100], process * p[], int last
                 cout << "*";
             }
         }
-        cout << "|\n";
+        cout << "| \n";
     }
     for (int i = 0; i < 48; i++)
     {
