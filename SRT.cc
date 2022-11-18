@@ -20,7 +20,7 @@ struct process
 void printTrace(int n, int total_waiting_time[100][100], process p[], int lastInstance)
 {
     cout << endl;
-    cout << "FB-1"
+    cout << "SRT"
          << "\t"
          << " ";
     for (int i = 0; i < lastInstance; i++)
@@ -63,7 +63,7 @@ void printStats(int n, int total_turnaround_time, process p[])
 {
     float totalTurnAround = 0;
     cout << endl;
-    cout << "FB-1"
+    cout << "SRT"
          << "\n";
     cout << "Process    ";
     for (int i = 0; i < n; i++)

@@ -17,10 +17,10 @@ struct process
     int isWaiting = 0;
     int response_time;
 };
-void printTrace(int n, int total_waiting_time[100][100], process p[], int lastInstance)
+void printTrace(int n, int total_waiting_time[100][100], process p[], int lastInstance,int tq)
 {
     cout << endl;
-    cout << "FB-1"
+    cout << "RR-"<<tq
          << "\t"
          << " ";
     for (int i = 0; i < lastInstance; i++)
@@ -59,11 +59,11 @@ void printTrace(int n, int total_waiting_time[100][100], process p[], int lastIn
         cout << "-";
     }
 }
-void printStats(int n, int total_turnaround_time, process p[])
+void printStats(int n, int total_turnaround_time, process p[],int tq)
 {
     float totalTurnAround = 0;
     cout << endl;
-    cout << "FB-1"
+    cout << "RR-"<<tq
          << "\n";
     cout << "Process    ";
     for (int i = 0; i < n; i++)
@@ -213,6 +213,14 @@ int main()
             {
                 burst_remaining[currentExecProcess]--;
                 remaining_qt[currentExecProcess]--;
+                if (burst_remaining[currentExecProcess] == 0)
+                {
+                    p[currentExecProcess].isWaiting = 0;
+                }
+                if (remaining_qt[currentExecProcess] == 0 && burst_remaining[currentExecProcess] > 0)
+                {
+                    p[currentExecProcess].isWaiting = 1;
+                }
                 total_waiting_time[currentExecProcess][currentTime] = 2;
             }
             else if (remaining_qt[currentExecProcess] == 0 && burst_remaining[currentExecProcess] > 0)
@@ -280,7 +288,7 @@ int main()
             {
                 if (z > p[y].arrival_time && total_waiting_time[y][z - 1] > 0)
                 {
-                    total_waiting_time[y][z] == 0 ? p[y].completion_time = z-1 : p[y].completion_time = z+1;
+                    total_waiting_time[y][z] == 0 ? p[y].completion_time = z - 1 : p[y].completion_time = z + 1;
                 }
             }
         }
@@ -293,8 +301,8 @@ int main()
 
     sort(p, p + n, compare2);
 
-    printStats(n, total_turnaround_time, p);
-    printTrace(n, total_waiting_time, p, lastInstance);
+    printStats(n, total_turnaround_time, p, tq);
+    printTrace(n, total_waiting_time, p, lastInstance, tq);
     // cout << "Average Turnaround Time = " << avg_turnaround_time << endl;
     // cout << "Average Waiting Time = " << avg_waiting_time << endl;
     // cout << "Average Response Time = " << avg_response_time << endl;

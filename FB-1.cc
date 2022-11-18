@@ -211,6 +211,14 @@ int main()
                 p[currentExecProcess].currentQueue = 0;
                 burst_remaining[currentExecProcess]--;
                 remaining_qt[currentExecProcess]--;
+                if (burst_remaining[currentExecProcess] == 0)
+                {
+                    p[currentExecProcess].isWaiting = 0;
+                }
+                if (remaining_qt[currentExecProcess] == 0 && burst_remaining[currentExecProcess] > 0)
+                {
+                    p[currentExecProcess].isWaiting = 1;
+                }
                 total_waiting_time[currentExecProcess][currentTime] = 2;
             }
         }
