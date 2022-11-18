@@ -155,6 +155,7 @@ int main()
     int burst_remaining[10];
     double remaining_qt[10];
     int idx;
+    int isAllEmpty = 1;
 
     // cout << setprecision(2) << fixed;
 
@@ -241,9 +242,16 @@ int main()
             else if (remaining_qt[currentExecProcess] == 0 && burst_remaining[currentExecProcess] > 0)
             {
                 p[currentExecProcess].isWaiting = 1;
-                p[currentExecProcess].currentQueue++;
+                for(int i = 0; i < 10 ; i++){
+                    if(q[i].empty() && isAllEmpty){
+                        isAllEmpty = 1;
+                    } else {
+                        isAllEmpty = 0;
+                    }
+                }
+                !isAllEmpty? p[currentExecProcess].currentQueue++:0;
                 remaining_qt[currentExecProcess] = pow(2, p[currentExecProcess].currentQueue);
-                p[currentExecProcess].currentQueue++;
+                // p[currentExecProcess].currentQueue++;
                 q[p[currentExecProcess].currentQueue].push(currentExecProcess);
                 for (int x = 0; x < ARRAYSIZE(q); x++)
                 {
