@@ -1,19 +1,20 @@
-#ifndef rr_h
-#define rr_h
+#ifndef srt_h
+#define srt_h
+
 
 #include <iostream>
 #include <algorithm>
 #include <iomanip>
 #include <queue>
 #include <cstring>
+#include "process.h"
 using namespace std;
 
-#include "process.h"
 
-void printTrace(int n, int total_waiting_time[100][100], int lastInstance, int tq, process * p[])
+void printTrace(int n, int total_waiting_time[100][100], process * p[], int lastInstance)
 {
-    cout << "RR-" << tq
-         << "  ";
+    cout << "SRT"
+         << "   ";
     for (int i = 0; i < lastInstance+1; i++)
     {
         cout << i % 10 << " ";
@@ -51,10 +52,10 @@ void printTrace(int n, int total_waiting_time[100][100], int lastInstance, int t
     }
     cout << "\n";
 }
-void printStats(int n, int total_turnaround, process * p[], int tq)
+void printStats(int n, int total_turnaround, process * p[])
 {
     float totalTurnAround = 0;
-    cout << "RR-" << tq
+    cout << "SRT"
          << "\n";
     cout << "Process    ";
     for (int i = 0; i < n; i++)
@@ -97,7 +98,7 @@ void printStats(int n, int total_turnaround, process * p[], int tq)
         cout << p[i]->turnaround << "  ";
         total_turnaround += p[i]->turnaround;
     }
-    cout << "|";
+    cout << "| ";
     cout << fixed << setprecision(2) << (float)total_turnaround / n;
     cout << "|";
     cout << "\n";
@@ -111,20 +112,44 @@ void printStats(int n, int total_turnaround, process * p[], int tq)
     cout << fixed << setprecision(2) << (float)totalTurnAround / n;
     cout << "|\n";
 }
-bool compare1(process * p1, process * p2)
+void deleteElementInQueue(queue<int> &que, int element)
 {
-    return p1->arrival < p2->arrival;
+    if (que.front() != element)
+    {
+        while (que.front() != element)
+        {
+            int currentProcess = que.front();
+            que.pop();
+            que.push(currentProcess);
+        }
+        que.pop();
+    }
+    else
+    {
+        que.pop();
+    }
+}
+queue<int> copyQueue(queue<int> src)
+{
+    queue<int> dest;
+    while (!src.empty())
+    {
+        int temp = src.front();
+        dest.push(temp);
+        src.pop();
+    }
+    return dest;
 }
 
 
-bool compare2(process * p1, process * p2)
+void srt(int n, int lastInstance, process * p[], string printmode)
 {
-    return p1->pid < p2->pid;
-}
 
 
-void rr(int n, int tq, int lastInstance, process * p[], string printmode)
-{
+    
+    // int tq;
+    
+    
     float avg_turnaround;
     float avg_waiting_time;
     float avg_response_time;
@@ -134,21 +159,14 @@ void rr(int n, int tq, int lastInstance, process * p[], string printmode)
     int total_response_time = 0;
     int total_idle_time = 0;
     float throughput;
-    int remaining_qt[10];
     int idx;
 
-
-    
     memset(total_waiting_time, 0, sizeof(total_waiting_time));
+
 
     for (int i = 0; i < n; i++)
     {
         p[i]->pid = i + 1;
-    }
-
-    for (int i = 0; i < 10; i++)
-    {
-        remaining_qt[i] = tq;
     }
 
 
@@ -173,77 +191,50 @@ void rr(int n, int tq, int lastInstance, process * p[], string printmode)
                 total_waiting_time[x][currentTime] = 1;
             }
         }
-        if (currentExecProcess < 0)
+        queue<int> sortedQ;
+        queue<int> qTemp;
+        qTemp = copyQueue(q);
+        if (!qTemp.empty())
         {
-            if (!q.empty())
+            for (int i = 0; i < qTemp.size(); i++)
             {
-                currentExecProcess = q.front();
-                q.pop();
-                p[currentExecProcess]->remainingtime--;
-                remaining_qt[currentExecProcess]--;
-                total_waiting_time[currentExecProcess][currentTime] = 2;
+                int firstElement = qTemp.front();
+                int minBurstRemaining = p[firstElement]->remainingtime;
+                currentExecProcess = firstElement;
+                qTemp.pop();
+                qTemp.push(firstElement);
+                while (qTemp.front() != firstElement)
+                {
+                    int currentProcess = qTemp.front();
+                    if (p[currentProcess]->remainingtime <= minBurstRemaining)
+                    {
+                        minBurstRemaining = p[currentProcess]->remainingtime;
+                        currentExecProcess = currentProcess;
+                    }
+                    qTemp.pop();
+                    qTemp.push(currentProcess);
+                }
+                sortedQ.push(currentExecProcess);
+                deleteElementInQueue(qTemp, currentExecProcess);
             }
+        }
+        currentExecProcess = sortedQ.front();
+        if (p[currentExecProcess]->remainingtime > 0)
+        {
+            p[currentExecProcess]->remainingtime--;
+            if (p[currentExecProcess]->remainingtime == 0)
+            {
+                p[currentExecProcess]->isWaiting = 0;
+                deleteElementInQueue(q, currentExecProcess);
+            }
+            total_waiting_time[currentExecProcess][currentTime] = 2;
         }
         else
         {
-            if (remaining_qt[currentExecProcess] > 0 && p[currentExecProcess]->remainingtime > 0)
-            {
-                p[currentExecProcess]->remainingtime--;
-                remaining_qt[currentExecProcess]--;
-                if (p[currentExecProcess]->remainingtime == 0)
-                {
-                    p[currentExecProcess]->isWaiting = 0;
-                }
-                if (remaining_qt[currentExecProcess] == 0 && p[currentExecProcess]->remainingtime > 0)
-                {
-                    p[currentExecProcess]->isWaiting = 1;
-                }
-                total_waiting_time[currentExecProcess][currentTime] = 2;
-            }
-            else if (remaining_qt[currentExecProcess] == 0 && p[currentExecProcess]->remainingtime > 0)
-            {
-                p[currentExecProcess]->isWaiting = 1;
-                remaining_qt[currentExecProcess] = tq;
-                q.push(currentExecProcess);
-                currentExecProcess = q.front();
-                q.pop();
-                p[currentExecProcess]->remainingtime--;
-                remaining_qt[currentExecProcess]--;
-                if (p[currentExecProcess]->remainingtime == 0)
-                {
-                    p[currentExecProcess]->isWaiting = 0;
-                }
-                if (remaining_qt[currentExecProcess] == 0 && p[currentExecProcess]->remainingtime > 0)
-                {
-                    p[currentExecProcess]->isWaiting = 1;
-                }
-                total_waiting_time[currentExecProcess][currentTime] = 2;
-            }
-            else if (remaining_qt[currentExecProcess] > 0 && p[currentExecProcess]->remainingtime == 0)
-            {
-                p[currentExecProcess]->isWaiting = 0;
-                remaining_qt[currentExecProcess] = 0;
-                currentExecProcess = q.front();
-                q.pop();
-                p[currentExecProcess]->remainingtime--;
-                remaining_qt[currentExecProcess]--;
-                total_waiting_time[currentExecProcess][currentTime] = 2;
-            }
-            else if (remaining_qt[currentExecProcess] == 0 && p[currentExecProcess]->remainingtime == 0)
-            {
-                p[currentExecProcess]->isWaiting = 0;
-                remaining_qt[currentExecProcess] = 0;
-                currentExecProcess = q.front();
-                q.pop();
-                p[currentExecProcess]->remainingtime--;
-                remaining_qt[currentExecProcess]--;
-                if (p[currentExecProcess]->remainingtime == 0)
-                {
-                    p[currentExecProcess]->isWaiting = 0;
-                }
-                total_waiting_time[currentExecProcess][currentTime] = 2;
-            }
+            deleteElementInQueue(q, currentExecProcess);
         }
+        // }
+        // cout << currentExecProcess << "\n";
     }
 
 
@@ -274,22 +265,19 @@ void rr(int n, int tq, int lastInstance, process * p[], string printmode)
 
     sort(p, p + n, compare2);
 
+
     if (!printmode.compare("stats") )
     {
-        printStats(n, total_turnaround, p, tq);
-
+    printStats(n, total_turnaround, p);
     }
     else
     {
-        printTrace(n, total_waiting_time, lastInstance, tq, p);
+    printTrace(n, total_waiting_time, p, lastInstance);
     }
-    
-    
     // cout << "Average Turnaround Time = " << avg_turnaround << endl;
     // cout << "Average Waiting Time = " << avg_waiting_time << endl;
     // cout << "Average Response Time = " << avg_response_time << endl;
     // cout << "CPU Utilization = " << cpu_utilisation << "%" << endl;
     // cout << "Throughput = " << throughput << " process/unit time" << endl;
 }
-
 #endif

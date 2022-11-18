@@ -12,6 +12,7 @@ using namespace std;
 #include "parse.h"
 #include "scheduler.h"
 #include "rr.h"
+#include "srt.h"
 
 int main()
 {

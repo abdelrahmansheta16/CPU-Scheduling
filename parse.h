@@ -14,6 +14,7 @@ using namespace std;
 #include "aging.h"
 #include "scheduler.h"
 #include "rr.h"
+#include "srt.h"
 
 void parse()
 {
@@ -109,7 +110,7 @@ void parse()
             spn(ptemp, maxtime, nump, timeline);
             break;
         case 4:
-            /* code */
+            srt(nump, maxtime, ptemp, outmode);
             break;
         case 5:
             hrrn(ptemp, maxtime, nump, timeline);
