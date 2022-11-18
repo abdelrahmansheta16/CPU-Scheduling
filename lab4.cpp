@@ -13,6 +13,7 @@ using namespace std;
 #include "scheduler.h"
 #include "rr.h"
 #include "srt.h"
+#include "fb.h"
 
 int main()
 {

@@ -14,12 +14,20 @@
 #define ARRAYSIZE(array) (sizeof(array) / sizeof(array[0]))
 using namespace std;
 
-
-void printTrace(int n, int total_waiting_time[100][100], process * p[], int lastInstance, int addpar)
+bool compare11(process * p1, process * p2)
 {
-    cout << "FB-" << addpar
-         << "\t"
-         << " ";
+    return p1->arrival < p2->arrival;
+}
+
+bool compare22(process * p1, process * p2)
+{
+    return p1->pid < p2->pid;
+}
+
+void printTracefb(int n, int total_waiting_time[100][100], process * p[], int lastInstance, int addpar)
+{
+    cout << "FB-" << addpar;
+    addpar == 1?cout << "  ": cout << "i ";
     for (int i = 0; i < lastInstance+1; i++)
     {
         cout << i % 10 << " ";
@@ -32,7 +40,7 @@ void printTrace(int n, int total_waiting_time[100][100], process * p[], int last
     cout << endl;
     for (int i = 0; i < n; i++)
     {
-        cout << p[i]->name << "\t";
+        cout << p[i]->name << "     ";
         for (int x = 0; x < lastInstance; x++)
         {
             cout << "|";
@@ -49,7 +57,7 @@ void printTrace(int n, int total_waiting_time[100][100], process * p[], int last
                 cout << "*";
             }
         }
-        cout << "|\n";
+        cout << "| \n";
     }
     for (int i = 0; i < 48; i++)
     {
@@ -59,11 +67,12 @@ void printTrace(int n, int total_waiting_time[100][100], process * p[], int last
 }
 
 
-void printStats(int n, int total_turnaround, process * p[], int addpar)
+void printStatsfb(int n, int total_turnaround, process * p[], int addpar)
 {
     float totalTurnAround = 0;
-    cout << "FB-" << addpar
-         << "\n";
+    cout << "FB-" << addpar;
+    addpar == 1?cout << "": cout << "i";
+    cout << "\n";
     cout << "Process    ";
     for (int i = 0; i < n; i++)
     {
@@ -120,9 +129,8 @@ void printStats(int n, int total_turnaround, process * p[], int addpar)
     cout << "|\n";
 }
 
-int fb(int n, int lastInstance, process * p[], int addpar, string outmode)
+void fb(int n, int lastInstance, process * p[], int addpar, string outmode)
 {
-    // int tq;
     float avg_turnaround;
     float avg_waiting_time;
     float avg_response_time;
@@ -134,6 +142,7 @@ int fb(int n, int lastInstance, process * p[], int addpar, string outmode)
     float throughput;
     double remaining_qt[10];
     int idx;
+    int isAllEmpty = 1;
 
 
 
@@ -152,7 +161,7 @@ int fb(int n, int lastInstance, process * p[], int addpar, string outmode)
     }
 
 
-    sort(p, p + n, compare1);
+    sort(p, p + n, compare11);
 
 
     queue<int> q[10];
@@ -212,16 +221,15 @@ int fb(int n, int lastInstance, process * p[], int addpar, string outmode)
             else if (remaining_qt[currentExecProcess] == 0 && p[currentExecProcess]->remainingtime > 0)
             {
                 p[currentExecProcess]->isWaiting = 1;
-                p[currentExecProcess]->currentQueue++;
-                
-                if (addpar == 1)
-                {
-                    remaining_qt[currentExecProcess] = 1;
+                for(int i = 0; i < 10 ; i++){
+                    if(q[i].empty() && isAllEmpty){
+                        isAllEmpty = 1;
+                    } else {
+                        isAllEmpty = 0;
+                    }
                 }
-                else
-                {
-                    remaining_qt[currentExecProcess] = pow(2, p[currentExecProcess]->currentQueue);
-                }
+                !isAllEmpty? p[currentExecProcess]->currentQueue++:0;                
+                remaining_qt[currentExecProcess] = addpar == 1? 1 : pow(2, p[currentExecProcess]->currentQueue);
                 q[p[currentExecProcess]->currentQueue].push(currentExecProcess);
                 for (int x = 0; x < ARRAYSIZE(q); x++)
                 {
@@ -306,9 +314,6 @@ int fb(int n, int lastInstance, process * p[], int addpar, string outmode)
                 }
             }
         }
-
-
-        cout << currentExecProcess << "\n";
     }
 
 
@@ -336,15 +341,15 @@ int fb(int n, int lastInstance, process * p[], int addpar, string outmode)
     // throughput = float(n) / (p[n - 1].finish - p[0].arrival);
 
 
-    sort(p, p + n, compare2);
+    sort(p, p + n, compare22);
 
     if (!outmode.compare("stats") )
     {
-    printStats(n, total_turnaround, p, addpar);
+    printStatsfb(n, total_turnaround, p, addpar);
     }
     else
     {
-    printTrace(n, total_waiting_time, p, lastInstance, addpar);
+    printTracefb(n, total_waiting_time, p, lastInstance, addpar);
     }
     // for (int i = 0; i < n; i++)
     // {

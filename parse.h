@@ -15,6 +15,7 @@ using namespace std;
 #include "scheduler.h"
 #include "rr.h"
 #include "srt.h"
+#include "fb.h"
 
 void parse()
 {
@@ -119,10 +120,10 @@ void parse()
             hrrn(ptemp, maxtime, nump, timeline, outmode);
             break;
         case 6:
-            /* code */
+            fb(nump, maxtime, ptemp, 1, outmode);
             break;
         case 7:
-            /* code */
+            fb(nump, maxtime, ptemp, 2, outmode);
             break;
         case 8:
             aging(ptemp, maxtime, nump, sched.front().addpar, timeline, outmode);
